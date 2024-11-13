@@ -1,4 +1,4 @@
-# unit-4-4-assignment
+# unit-4-4-assignment-b
 
 ## Git Config
 ```
@@ -20,108 +20,133 @@ java Main.java
 
 After you compile the shape classes, you only need to compile and run `Main.java` as usual.
 
-# Instructions  
+# Problem 0
+To help you with Problem 3, it might be useful to refamiliraize yourself with the "find and remove" algorithm.  Write a program which takes in two strings, a `sentence` and a `target`, and removes the `target` from the `sentence` (if the target exists).
 
-## Problem 1
-Write a program which takes a String input and then prints the number of times the letter p is followed by a vowel (y is not considered a vowel here). Assume that your entire input is entered in lower case.
+The general steps are:
+1. Determine if the `target` is in the `sentence` (use `indexOf()`)
+2. If it is in the `sentence`, then get a substring of everything before the `target`
+3. Get a substring of everything after the `target`
+4. Combine the "before" and "after" substrings
+
+# Problem 1 - CountSub
+Write a program which takes in two Strings `word` and `target` and returns the number of occurrences of `target` in the `word`.  Assume all inputs are given in lowercase.
+
+**Hint:** Check `N` letters at a time, where `N` is the length of the target.  Get a substring that is `target.length()` long, and see if it is equal to the `target`.  If it is, then count it.
+
+**Hint:** See the slides for an example of checking two letters at at time.  How would you check three letters at a time?  Generalize this to check `N` letters at a time.
+
+### Sample run
+```md
+Input word:
+gagagigo the risen
+
+Input target:
+ga
+
+The substring ga appears 2 times
+```
+
+# Problem 2 - CountProperContains
+Write a program that takes in two Strings, `word` and `target`, and returns the number of times the `target` is *properly contained* within the `word`.
+
+A substring is said to be *properly contained* if it meets both of the following conditions:
+* The substring is the beginning of the String or is immediately preceded by a space (i.e., has a space before the substring)
+* The substring is the end of the String or is immediately followed by a space (i.e., there's a space after the substring)
+
+## Examples of substrings being *properly contained*:
+* `"bada"` is properly contained in `"bada boom baby"`
+* `"boom"` is properly contained in `"bada boom baby"`
+* `"oom"` is properly contained in `"badab oom baby"`
+
+## Non-examples of substrings being *properly contained*:
+* `"bada"` is NOT properly contained in `"badaboom baby"` (there needs to be a space after the `"bada"`)
+* `"dab"` is NOT properly contained in `"badaboom baby"`
+* `"ada"` is NOT properly contained in `"badaboom baby"`
+* `"schlay"` is NOT properly contained in `"badaboom baby"`
+
+Sample Run
+```md
+Input word:
+bada the badaboom the bobadabo baby
+
+Input Target:
+bada
+
+The substring bada is properly contained 1 times
+```
+
+# Problem 3 - DeleteSub
+Write a program which takes in two Strings `word` and `target` and removes all occurrences of `target` from `word`.  Return this new `String` with all instances of the `target` removed.  Assume all inputs are in lowercase.
+
+One possible solution goes like this:
+1. While the `target` can still be found in the `word` (use `indexOf()`)
+2. Remove the `target` from the word (by combining a substring of everything before the `target` with everything after the `target`)
 
 Sample run
 ```
-Input String:
-Peter Piper picked a pack of pickle peppers.
-Contains p followed by a vowel 8 times.
-```
+Input word:
+gagagigo the giga Risen
 
-## Problem 2
-The five most common letters in the English alphabet are e, t, a, i, o. Write a program which takes a string input and then prints the same string without the five most common letters in the English alphabet (e, t, a, i o).  Assume your String input is in all lowercase.
+Input target:
+gig
 
-Hint: one good way to do this is to make a new String variable and add all the letters you want to print (i.e. everything except the five most common letters) to it.
-
-Sample Run:
-```
-Enter a string:
-Peter Piper picked a pack of pickle peppers.
-pr ppr pckd  pck f pckl ppprs.
-```
-
-## Problem 3
-Take two String inputs of the same length and merge these two strings in reverse order by taking one character from each String (starting with the second string entered) and alternating. If the Strings are not the same length, the program should print "error".
-
-Sample Run 1:
-```
-Enter two strings:
-balloon
-atrophy
-ynhopoolrltaab
-```
-Sample Run 2:
-```
-Enter two strings:
-terrible
-mistake
-error
+New String:
+gagao the a risen
 ```
 
 ## Sample Solutions
 ```java
-// Problem 1
-Scanner sc = new Scanner(System.in);
-String input;
-int count = 0;
-
-System.out.println("Input String:");
-input = sc.nextLine();
-
-for (int i = 0; i < input.length()-1; i++)
+public static int countSub(String word, String target)
 {
-  String pair = input.substring(i, i+2);
-  if (pair.equals("pa") || pair.equals("pe") || pair.equals("pi") || pair.equals("po") || pair.equals("pu"))
+  int count = 0;
+
+  // This stops at the Nth to last letter, where N is the
+  // length of the target.  As in, I am checking N letters
+  // at a time.
+  for (int i = 0; i < word.length() - (target.length() - 1); i++)
   {
-    count++;
+    String sub = word.substring(i, i + target.length());
+    if (sub.equals(target))
+    {
+      count++;
+    }
   }
+  return count;
 }
 
-System.out.println("Contains p followed by a vowel " + count + " times.");
-
-// Problem 2
-Scanner sc = new Scanner(System.in);
-String input;
-String other = "";
-
-System.out.println("Input String:");
-input = sc.nextLine();
-
-for (int i = 0; i < input.length(); i++)
+public static int countProperContains(String word, String target)
 {
-  String ch = input.substring(i, i+1);
-  if (! (ch.equals("e") || ch.equals("t") || ch.equals("a") || ch.equals("i") || ch.equals("o")) )
+  int count = 0;
+  for (int i = 0; i < word.length() - (target.length() - 1); i++)
   {
-    other += ch;
+    String sub = word.substring(i, i+target.length());
+    if (sub.equals(target))
+    {
+      int beginOfTarget = i;
+      int endOfTarget = i+target.length();
+
+      // Note: short circuiting prevents me from checking out of bounds when I attempt
+      // to check for the letter at (begin-1, begin) and at (end, end+1)
+      boolean beginOrSpaceBefore = (beginOfTarget == 0 || word.substring(beginOfTarget-1, beginOfTarget).equals(" "));
+      boolean endOrSpaceAfter = (endOfTarget == word.length() || word.substring(endOfTarget, endOfTarget+1).equals(" "));
+      if (beginOrSpaceBefore && endOrSpaceAfter)
+      {
+        count++;
+      }
+    }
   }
+  return count;
 }
-System.out.println(other);
 
-// Problem 3
-Scanner sc = new Scanner(System.in);
-String str1;
-String str2;
-String output = "";
-
-System.out.println("Enter two strings:");
-str1 = sc.nextLine();
-str2 = sc.nextLine();
-
-if (str1.length() == str2.length())
+public static String deleteSub(String word, String target)
 {
-  for (int i = str1.length()-1; i >= 0; i--)
+  // As long as the target is found in the word, we remove it
+  while (word.indexOf(target) != -1)
   {
-    output += str2.substring(i, i+1) + str1.substring(i, i+1);
+    // Combine everything before the target with everything after target
+    word = word.substring(0, indexOfTarget) + word.substring(indexOfTarget + target.length());
   }
+  return word;
 }
-else
-{
-  System.out.println("error");
-}
-
-System.out.println(output);
 ```
